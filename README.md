@@ -38,3 +38,16 @@ python3 scripts/list_sessions.py
 python3 scripts/flight_recorder.py --session-id <UUID> --mode cleaned --output record.md
 ```
 *(If `--session-id` is omitted, the script will automatically detect the last session run in the current directory).*
+
+---
+
+### 🧬 The A.I.M. Ecosystem
+
+This project is a dedicated skill plugin operating within the broader A.I.M. Ecosystem. 
+
+- **[aim-agy](https://github.com/BrianV1981/aim-agy):** The Core Engine (Built for Antigravity CLI). *This is the flagship repository.*
+- **[aim-opencode](https://github.com/BrianV1981/aim-opencode):** Core adaptation for the OpenCode ecosystem.
+- **[aim](https://github.com/BrianV1981/aim):** The original framework built for Google's Gemini CLI.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+☕ **Support the project:** [Buy Me a Coffee](https://buymeacoffee.com/brianv1981)
