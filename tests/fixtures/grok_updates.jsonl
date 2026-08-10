@@ -1,0 +1,3 @@
+{"timestamp": 1, "method": "session/update", "params": {"sessionId": "fixture-session-id-001", "update": {"sessionUpdate": "user_message_chunk", "content": {"type": "text", "text": "Pull a flight record of this session"}}}}
+{"timestamp": 2, "method": "session/update", "params": {"sessionId": "fixture-session-id-001", "update": {"sessionUpdate": "agent_message_chunk", "content": {"type": "text", "text": "I will list sessions then extract."}}}}
+{"timestamp": 3, "method": "session/update", "params": {"sessionId": "fixture-session-id-001", "update": {"sessionUpdate": "tool_call", "name": "run_terminal_command", "arguments": {"command": "python3 scripts/list_sessions.py", "description": "List sessions"}}}}

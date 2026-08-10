@@ -1,43 +1,68 @@
 # 🛫 A.I.M. Flight Recorder
 
-**A forensic skill and plugin for Google Antigravity (AGY) and the A.I.M. Exoskeleton.**
+**A forensic skill for AGY/Antigravity and Grok CLI (dual vessel).**
 
-The `aim-flight-recorder` skill taps directly into the Antigravity local brain to parse native `.jsonl` session logs. It extracts, formats, and generates clean, human-readable Markdown summaries of any agent's conversational trajectory.
+Parses native session logs and writes clean Markdown **Flight Records**:
+
+| Vessel | Logs |
+|--------|------|
+| **AGY** | `~/.gemini/antigravity-cli/brain/…/transcript.jsonl` |
+| **Grok** | `~/.grok/sessions/<cwd>/<session_id>/updates.jsonl` |
 
 ## Features
 
-- **Chronological Indexing**: Easily parse and list all historical agent sessions grouped by workspace and date using `list_sessions.py`.
-- **Intelligent Auto-Detection**: The skill natively hooks into `history.jsonl` to auto-detect the latest active session in your current directory.
-- **Granular Formatting Modes**:
-  - `full`: Extracts raw tool payloads, giant terminal outputs, and conversational context.
-  - `cleaned` *(default)*: Generates a concise action-oriented summary without giant JSON blobs.
-  - `hybrid`: Shows specific tool arguments (like targeted files or command line execution strings) without rendering the final tool outputs.
-  - `chat_only`: Produces a pure back-and-forth conversational log, completely stripping all tool execution traces.
+- **Chronological indexing** — `list_sessions.py` lists **AGY and Grok** sessions.
+- **Auto-detection** — latest Grok `updates.jsonl` and/or AGY `history.jsonl` for the current workspace.
+- **Format auto-detect** — AGY transcript vs Grok `updates.jsonl` (or pass `--input`).
+- **Modes:** `full` · `cleaned` *(default)* · `hybrid` · `chat_only`.
 
-## Installation (Antigravity CLI)
+Dual-vessel policy: [docs/VESSEL_DUAL_COMPAT.md](docs/VESSEL_DUAL_COMPAT.md).
 
-To securely integrate this into your Antigravity environment, clone this repository and create a symlink to your `skills` directory:
+## Installation
 
 ```bash
 git clone https://github.com/BrianV1981/aim-flight-recorder.git
 cd aim-flight-recorder
-ln -s $(pwd) ~/.gemini/antigravity-cli/skills/aim-flight-recorder
 ```
 
-Once linked, any Antigravity agent will understand how to use the flight recorder natively. You can simply command your agent: *"Pull a flight record of my last session."*
+### Grok CLI
 
-## Manual Usage
+```bash
+mkdir -p ~/.grok/skills
+ln -sfn "$(pwd)" ~/.grok/skills/aim-flight-recorder
+# or project-local:
+# mkdir -p .grok/skills && ln -sfn "$(pwd)" .grok/skills/aim-flight-recorder
+```
 
-### 1. Find a Session ID
+### AGY / Antigravity (preserved)
+
+```bash
+mkdir -p ~/.gemini/antigravity-cli/skills
+ln -sfn "$(pwd)" ~/.gemini/antigravity-cli/skills/aim-flight-recorder
+```
+
+Then: *"Pull a flight record of my last session."*
+
+## Manual usage
+
+### 1. Find a session ID
 ```bash
 python3 scripts/list_sessions.py
 ```
 
-### 2. Extract the Record
+### 2. Extract the record
 ```bash
-python3 scripts/flight_recorder.py --session-id <UUID> --mode cleaned --output record.md
+python3 scripts/flight_recorder.py --session-id <ID> --mode cleaned --output record.md
+# or explicit file (AGY or Grok):
+python3 scripts/flight_recorder.py --input path/to/updates.jsonl --mode cleaned -o record.md
 ```
-*(If `--session-id` is omitted, the script will automatically detect the last session run in the current directory).*
+*(If `--session-id` is omitted, auto-detects the latest known session.)*
+
+## Tests
+
+```bash
+python3 -m unittest tests.test_flight_recorder -v
+```
 
 ---
 

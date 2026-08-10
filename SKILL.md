@@ -1,53 +1,97 @@
 ---
 name: aim-flight-recorder
-description: Generates clean, human-readable markdown summaries (Flight Records) of agent session transcripts from the Antigravity raw JSONL logs.
+description: >
+  Generates clean, human-readable markdown summaries (Flight Records) of agent
+  session transcripts from AGY/Antigravity brain JSONL and Grok CLI session
+  logs (updates.jsonl). Use when the Operator asks to pull a flight record,
+  summarize a session, clean up a log, or audit a past/current session.
+  Slash: /aim-flight-recorder.
 ---
 
-# 🛫 AIM-Flight-Recorder
+# AIM-Flight-Recorder
 
-You have access to the **A.I.M. Flight Recorder**, a forensic tool designed to parse the raw JSONL session logs in `~/.gemini/antigravity-cli/brain/` and extract human-readable Markdown summaries. 
+Forensic tool for **dual vessels**:
 
-Use this skill when the Operator asks you to "pull a flight record", "summarize the session", "clean up the log", or requests an audit of what happened in a past session or the current session.
+| Vessel | Session logs |
+|--------|----------------|
+| **AGY / Antigravity** | `~/.gemini/antigravity-cli/brain/<id>/.system_generated/logs/transcript.jsonl` |
+| **Grok CLI** | `~/.grok/sessions/<urlencode(cwd)>/<session_id>/updates.jsonl` |
 
-## Usage Instructions
+Use when the Operator asks to "pull a flight record", "summarize the session", "clean up the log", or audit a past/current session.
 
-This skill provides two python scripts located in the `scripts/` directory.
+## Install roots (do not strip either)
 
-### 1. Listing Available Sessions
-To see a chronological list of all recorded sessions across all projects, use:
+| Vessel | Symlink target |
+|--------|----------------|
+| Grok | `~/.grok/skills/aim-flight-recorder` **or** `<project>/.grok/skills/aim-flight-recorder` |
+| AGY | `~/.gemini/antigravity-cli/skills/aim-flight-recorder` **or** project `.gemini/skills/` |
+
+Clone once; symlink the **repo root** (this `SKILL.md` + `scripts/`) into the vessel skills dir.
+
+## Scripts
+
+Resolve the skill install path (examples use `$SKILL_ROOT`):
+
 ```bash
-python3 /home/kingb/aim-flight-recorder/scripts/list_sessions.py
+# library checkout
+SKILL_ROOT="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
+# after Grok install
+# SKILL_ROOT="$HOME/.grok/skills/aim-flight-recorder"
+# after AGY install
+# SKILL_ROOT="$HOME/.gemini/antigravity-cli/skills/aim-flight-recorder"
 ```
-This will print a beautiful table showing the Date, Session UUID, Turn Count, and Workspace for every flight record in the Brain, making it easy to find the exact UUID you need.
 
-### 2. Extracting a Flight Record
-To generate the actual markdown summary, execute:
+### 1. List sessions (AGY + Grok)
+
 ```bash
-python3 /home/kingb/aim-flight-recorder/scripts/flight_recorder.py [OPTIONS]
+python3 "$SKILL_ROOT/scripts/list_sessions.py"
 ```
 
-### Arguments & Options
+Prints tables with vessel, date, session id, turn count, workspace.
 
-1. **`--session-id <UUID>`**: (Optional) The specific conversation UUID to extract. If omitted, the script will automatically parse the Operator's `history.jsonl` and detect the latest active session.
-2. **`--output <FILE.md>`**: (Optional) Where to save the output markdown file. Defaults to `flight_record.md`.
-3. **`--mode <MODE>`**: (Optional) Determines the verbosity of the extracted logs. Defaults to `cleaned`.
-   - `full`: Extracts everything. Full agent responses, raw JSON payloads of tool calls, and complete terminal/tool output blocks (can be extremely long).
-   - `cleaned`: (Recommended) Extracts agent responses and provides a concise one-line summary of each tool call (e.g., `- Executed run_command: Check git status`). Drops raw JSON and terminal outputs.
-   - `chat_only`: Strips all tool calls completely. Only extracts the back-and-forth text messages between the Operator and the Agent.
-   - `hybrid`: Extracts agent responses and the specific *target* of the tool call (e.g., the command line string or the targeted file path) but drops the raw outputs and JSON.
+### 2. Extract a flight record
+
+```bash
+python3 "$SKILL_ROOT/scripts/flight_recorder.py" [OPTIONS]
+```
+
+#### Options
+
+1. **`--session-id <ID>`** — AGY conversation UUID or Grok session id. If omitted, auto-detects latest Grok `updates.jsonl` mtime, then AGY `history.jsonl` for the current workspace.
+2. **`--input` / `-i <FILE>`** — Explicit path to AGY `transcript.jsonl` or Grok `updates.jsonl`.
+3. **`--output` / `-o <FILE.md>`** — Defaults to `flight_record.md`.
+4. **`--mode <MODE>`** — Default `cleaned`:
+   - `full` — full agent text, tool payloads, tool outputs
+   - `cleaned` — agent text + one-line tool summaries
+   - `chat_only` — Operator/Agent text only
+   - `hybrid` — agent text + tool targets (commands/paths), no raw outputs
 
 ### Examples
 
-**Example 1: Extracting a quick conversational chat log of the current session**
 ```bash
-python3 /home/kingb/aim-flight-recorder/scripts/flight_recorder.py --mode chat_only --output chat_summary.md
+# Conversational only (current/latest session)
+python3 "$SKILL_ROOT/scripts/flight_recorder.py" --mode chat_only --output chat_summary.md
+
+# Explicit session
+python3 "$SKILL_ROOT/scripts/flight_recorder.py" \
+  --session-id a1b2c3d4-5678-90ab-cdef-1234567890ab \
+  --mode hybrid --output audit_log.md
+
+# Grok updates.jsonl by path
+python3 "$SKILL_ROOT/scripts/flight_recorder.py" \
+  --input "$HOME/.grok/sessions/<enc-cwd>/<session-id>/updates.jsonl" \
+  --mode cleaned --output grok_record.md
 ```
 
-**Example 2: Auditing a past session explicitly**
-```bash
-python3 /home/kingb/aim-flight-recorder/scripts/flight_recorder.py --session-id a1b2c3d4-5678-90ab-cdef-1234567890ab --mode hybrid --output audit_log.md
-```
+## Agentic guidelines
 
-## Agentic Guidelines
-- **Always confirm the mode**: If the Operator asks for a flight record but doesn't specify how detailed they want it, default to `--mode cleaned`, but remind them that `full`, `chat_only`, and `hybrid` are available if they need more or less granularity.
-- **Do not read the full flight record blindly**: If you generate a `--mode full` flight record, DO NOT attempt to read the entire `.md` file back into your own context window via `view_file` unless explicitly asked, as it may overwhelm your memory. Simply tell the Operator where the file was saved.
+- Default mode: **`cleaned`**. Mention `full` / `chat_only` / `hybrid` if the Operator wants more or less detail.
+- **Do not** read a `--mode full` record entirely into context unless asked — report the output path instead.
+- Prefer host-appropriate read tools when skimming a record:
+
+  | Vessel | Prefer |
+  |--------|--------|
+  | Grok | `read_file` (limit/offset for large files) |
+  | AGY | `view_file` / host read tools |
+
+- Preserve **both** AGY and Grok paths when editing this skill — dual vessel policy.
