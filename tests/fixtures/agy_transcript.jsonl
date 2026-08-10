@@ -1,0 +1,4 @@
+{"type":"USER_INPUT","content":"Check the status of the repo"}
+{"type":"PLANNER_RESPONSE","content":"I will run git status.","tool_calls":[{"function_name":"run_command","args":{"toolSummary":"Check git status","CommandLine":"git status"}}]}
+{"type":"TOOL_RESPONSE","content":"On branch master\nnothing to commit"}
+{"type":"PLANNER_RESPONSE","content":"Working tree is clean.","tool_calls":[]}
