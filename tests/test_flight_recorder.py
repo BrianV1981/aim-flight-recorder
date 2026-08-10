@@ -50,16 +50,32 @@ class TestSkillFrontmatterAndPortability(unittest.TestCase):
 
     def test_no_machine_absolute_home_paths_in_docs(self):
         offenders = []
-        for rel in ("SKILL.md", "README.md"):
-            path = ROOT / rel
+        # Product + docs + scripts (not this test file's ban-list strings)
+        scan = [ROOT / "SKILL.md", ROOT / "README.md"]
+        scan += list((ROOT / "docs").rglob("*")) if (ROOT / "docs").is_dir() else []
+        scan += list((ROOT / "scripts").rglob("*")) if (ROOT / "scripts").is_dir() else []
+        scan += list((ROOT / "tests" / "fixtures").rglob("*")) if (ROOT / "tests" / "fixtures").is_dir() else []
+        for path in scan:
             if not path.is_file():
                 continue
-            for i, line in enumerate(path.read_text(encoding="utf-8").splitlines(), 1):
-                if re.search(r"/home/user\b|/home/YOU\b|/Users/you\b", line, re.I):
+            if path.suffix not in {".md", ".py", ".sh", ".json", ".yaml", ".yml", ".txt"}:
+                continue
+            if "__pycache__" in path.parts:
+                continue
+            rel = path.relative_to(ROOT)
+            for i, line in enumerate(path.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
+                if re.search(r"/home/user\b|/home/YOU\b|/Users/you\b|/home/<", line, re.I):
                     continue
-                if HOME_ABS_RE.search(line):
+                if "No machine-local" in line or "`/home/<user>" in line:
+                    continue
+                if HOME_ABS_RE.search(line) or re.search(r"\bkingb\b", line, re.I):
                     offenders.append(f"{rel}:{i}: {line.strip()}")
-        self.assertEqual(offenders, [], "portable paths only:\n" + "\n".join(offenders))
+        self.assertEqual(
+            offenders,
+            [],
+            "portable paths only (ban absolute homes and operator usernames):\n"
+            + "\n".join(offenders),
+        )
 
     def test_skill_documents_both_skill_install_roots(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")

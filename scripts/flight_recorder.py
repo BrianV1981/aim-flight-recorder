@@ -158,13 +158,33 @@ def _flatten_text(content: Any) -> str:
     return str(content)
 
 
+def _display_source_path(file_path: str) -> str:
+    """Prefer path relative to CWD for portability; never invent machine roots."""
+    try:
+        abs_p = os.path.abspath(file_path)
+        cwd = os.path.abspath(os.getcwd())
+        if abs_p == cwd or abs_p.startswith(cwd + os.sep):
+            return os.path.relpath(abs_p, cwd)
+    except OSError:
+        pass
+    # Keep ~ for home-relative when under user home
+    try:
+        home = os.path.expanduser("~")
+        abs_p = os.path.abspath(file_path)
+        if abs_p.startswith(home + os.sep):
+            return "~/" + os.path.relpath(abs_p, home).replace(os.sep, "/")
+    except OSError:
+        pass
+    return file_path
+
+
 def parse_grok_updates(file_path: str, mode: str = "cleaned") -> str:
     """Rebuild Operator/Agent turns from Grok session updates.jsonl."""
     session_id = "unknown"
     lines_out: list[str] = [
         f"# Flight Recorder: {mode.upper()}",
         "",
-        f"**Source:** `{file_path}`",
+        f"**Source:** `{_display_source_path(file_path)}`",
         f"**Format:** Grok `updates.jsonl`",
         "",
     ]
