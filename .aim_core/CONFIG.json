@@ -1,0 +1,17 @@
+{
+  "agent_identity": {
+    "name": "A.I.M.",
+    "role": "High-context technical lead and sovereign orchestrator.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "continuity_dir": "aim-agy_os/continuity",
+    "archive_dir": "aim-agy_os/archive",
+    "memory_dir": "aim-agy_os/memory_lance",
+    "wiki_dir": "aim-agy_os/memory-wiki"
+  },
+  "settings": {
+    "obsidian_vault_path": "aim-agy_os/memory-wiki",
+    "allowed_root": "."
+  }
+}
