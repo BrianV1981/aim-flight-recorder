@@ -5,13 +5,39 @@
     "version": "1.0.0"
   },
   "paths": {
-    "continuity_dir": "aim-agy_os/continuity",
+    "continuity_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/continuity",
     "archive_dir": "aim-agy_os/archive",
-    "memory_dir": "aim-agy_os/memory_lance",
-    "wiki_dir": "aim-agy_os/memory-wiki"
+    "memory_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/memory",
+    "wiki_dir": "aim-agy_os/memory-wiki",
+    "aim_root": "/home/kingb/aim-flight-recorder",
+    "os_root": "/home/kingb/aim-flight-recorder/aim-agy_os",
+    "core_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/core",
+    "docs_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/docs",
+    "hooks_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/hooks",
+    "archive_raw_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/archive_raw",
+    "archive_index_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/archive_index",
+    "src_dir": "/home/kingb/aim-flight-recorder/aim-agy_os/.aim_core",
+    "tmp_chats_dir": "/home/kingb/.gemini/antigravity-cli/brain"
   },
   "settings": {
     "obsidian_vault_path": "aim-agy_os/memory-wiki",
-    "allowed_root": "."
+    "allowed_root": ".",
+    "semantic_pruning_threshold": 0.85,
+    "scrivener_interval_minutes": 30,
+    "archive_retention_days": 30,
+    "sentinel_mode": "full",
+    "auto_distill_tier": "T4",
+    "auto_rebirth": false
+  },
+  "models": {
+    "embedding_provider": "local",
+    "embedding": "nomic-embed-text",
+    "embedding_endpoint": "http://127.0.0.1:11434/api/embeddings",
+    "default_reasoning": {
+      "provider": "google",
+      "model": "agy-flash-latest",
+      "endpoint": "https://generativelanguage.googleapis.com",
+      "auth_type": "API Key"
+    }
   }
 }

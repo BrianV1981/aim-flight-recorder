@@ -8,3 +8,10 @@ flight_record.md
 *.local.md
 sample_record.md
 test.md
+
+# --- J.O.S.H.U.A. OS Exoskeleton ---
+joshua_os/
+aim
+workspace/
+archive/
+.aim_core/
